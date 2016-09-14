@@ -14,62 +14,56 @@ import java.io.IOException;
 
 /** A basic Camera preview class */
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
-    private static final String TAG ="CAMERAPreview";
     private SurfaceHolder mHolder;
     private Camera mCamera;
 
-    public CameraPreview(Context context, Camera camera) {
+    public CameraPreview(Context context,Camera camera) {
         super(context);
         mCamera = camera;
-
-        // Install a SurfaceHolder.Callback so we get notified when the
-        // underlying surface is created and destroyed.
+        mCamera.setDisplayOrientation(90);
+        //get the holder and set this class as the callback, so we can get camera data here
         mHolder = getHolder();
         mHolder.addCallback(this);
-        // deprecated setting, but required on Android versions prior to 3.0
-        mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+        mHolder.setType(SurfaceHolder.SURFACE_TYPE_NORMAL);
     }
 
-    public void surfaceCreated(SurfaceHolder holder) {
-        // The Surface has been created, now tell the camera where to draw the preview.
-        try {
-            mCamera.setPreviewDisplay(holder);
-            mCamera.startPreview();
-        } catch (IOException e) {
-            Log.d(TAG, "Error setting camera preview: " + e.getMessage());
-        }
-    }
-
-    public void surfaceDestroyed(SurfaceHolder holder) {
-        // empty. Take care of releasing the Camera preview in your activity.
-    }
-
-    public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
-        // If your preview can change or rotate, take care of those events here.
-        // Make sure to stop the preview before resizing or reformatting it.
-
-        if (mHolder.getSurface() == null){
-            // preview surface does not exist
-            return;
+        @Override
+        public void surfaceCreated(SurfaceHolder surfaceHolder) {
+            try{
+                //when the surface is created, we can set the camera to draw images in this surfaceholder
+                mCamera.setPreviewDisplay(surfaceHolder);
+                mCamera.startPreview();
+            } catch (IOException e) {
+                Log.d("ERROR", "Camera error on surfaceCreated " + e.getMessage());
+            }
         }
 
-        // stop preview before making changes
-        try {
+        @Override
+        public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i2, int i3) {
+            //before changing the application orientation, you need to stop the preview, rotate and then start it again
+            if(mHolder.getSurface() == null)//check if the surface is ready to receive camera data
+                return;
+
+            try{
+                mCamera.stopPreview();
+            } catch (Exception e){
+                //this will happen when you are trying the camera if it's not running
+            }
+
+            //now, recreate the camera preview
+            try{
+                mCamera.setPreviewDisplay(mHolder);
+                mCamera.startPreview();
+            } catch (IOException e) {
+                Log.d("ERROR", "Camera error on surfaceChanged " + e.getMessage());
+            }
+        }
+
+        @Override
+        public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
+            //our app has only one screen, so we'll destroy the camera in the surface
+            //if you are unsing with more screens, please move this code your activity
             mCamera.stopPreview();
-        } catch (Exception e){
-            // ignore: tried to stop a non-existent preview
+            mCamera.release();
         }
-
-        // set preview size and make any resize, rotate or
-        // reformatting changes here
-
-        // start preview with new settings
-        try {
-            mCamera.setPreviewDisplay(mHolder);
-            mCamera.startPreview();
-
-        } catch (Exception e){
-            Log.d(TAG, "Error starting camera preview: " + e.getMessage());
-        }
-    }
 }
