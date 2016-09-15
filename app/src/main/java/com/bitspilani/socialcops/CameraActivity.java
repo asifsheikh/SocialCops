@@ -7,7 +7,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 import android.widget.Toast;
 
 
@@ -27,7 +26,8 @@ public class CameraActivity extends Activity {
         setContentView(R.layout.previewlayout);
 
         try{
-            mCamera = Camera.open();//you can use open(int) to use different cameras
+            releaseCameraAndPreview();
+            mCamera = getCameraInstance();//you can use open(int) to use different cameras
         } catch (Exception e){
             Log.d("ERROR", "Failed to get camera: " + e.getMessage());
         }
@@ -67,6 +67,14 @@ public class CameraActivity extends Activity {
             e.printStackTrace();
         }
         return c; // returns null if camera is unavailable
+    }
+
+    private void releaseCameraAndPreview() {
+       if(mCameraView != null) mCameraView.setmCamera(null);
+        if (mCamera != null) {
+            mCamera.release();
+            mCamera = null;
+        }
     }
 
 
