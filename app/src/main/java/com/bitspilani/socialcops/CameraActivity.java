@@ -33,7 +33,7 @@ public class CameraActivity extends Activity {
         }
 
         if(mCamera != null) {
-            Toast.makeText(CameraActivity.this, "camera is null", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(CameraActivity.this, "camera is null", Toast.LENGTH_SHORT).show();
             mCameraView = new CameraPreview(this, mCamera);//create a SurfaceView to show camera data
             FrameLayout camera_view = (FrameLayout)findViewById(R.id.camera_preview);
             camera_view.addView(mCameraView);//add the SurfaceView to the layout
@@ -71,17 +71,6 @@ public class CameraActivity extends Activity {
 
     private void releaseCameraAndPreview() {
        if(mCameraView != null) mCameraView.setmCamera(null);
-        if (mCamera != null) {
-            mCamera.release();
-            mCamera = null;
-        }
-    }
-
-
-
-    @Override
-    protected void onPause() {
-        super.onPause();
         if (mCamera != null) {
             mCamera.release();
             mCamera = null;

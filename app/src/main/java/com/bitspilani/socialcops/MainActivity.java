@@ -11,6 +11,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.kinvey.android.callback.KinveyPingCallback;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, MainDialogFragment.MainDialogListener{
@@ -23,6 +24,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        final FloatingActionsMenu menuSelfieActions = (FloatingActionsMenu) findViewById(R.id.selfie_actions);
+
+        findViewById(R.id.action_camera).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this,CameraActivity.class));
+                menuSelfieActions.collapse();
+            }
+        });
+
+        findViewById(R.id.action_video).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this,VideoActivity.class));
+                menuSelfieActions.collapse();
+            }
+        });
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 
         ((SocialCopsApplication)getApplication()).getmKinveyClient().ping(new KinveyPingCallback() {
@@ -55,6 +75,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //findViewById(R.id.selfie_actions).
     }
 
     @Override
