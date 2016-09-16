@@ -13,7 +13,7 @@ import android.view.SurfaceView;
 import java.io.IOException;
 
 /** A basic Camera preview class */
-public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
+public class CameraView extends SurfaceView implements SurfaceHolder.Callback {
     private SurfaceHolder mHolder;
     private Camera mCamera;
 
@@ -25,7 +25,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         this.mCamera = mCamera;
     }
 
-    public CameraPreview(Context context,Camera camera) {
+    public CameraView(Context context, Camera camera) {
         super(context);
         mCamera = camera;
         mCamera.setDisplayOrientation(90);

@@ -9,8 +9,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
+import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
@@ -19,13 +23,24 @@ public class PhotoHandler implements PictureCallback {
 
     private final Context context;
 
+    private byte[] data;
+    private Camera camera;
+
     public PhotoHandler(Context context) {
         this.context = context;
     }
 
     @Override
     public void onPictureTaken(byte[] data, Camera camera) {
+        this.data = data;
+        this.camera = camera;
+        Intent intent = new Intent(context,CameraPreviewAcivity.class);
+        intent.putExtra("ImageData", data);
+        ((CameraActivity) context).startActivityForResult(new Intent(context,CameraPreviewAcivity.class),90);
+        //context.startActivityForResult(new Intent(context,CameraPreviewAcivity.class));
+    }
 
+    private void savePicture(){
         File pictureFileDir = getDir();
 
         if (!pictureFileDir.exists() && !pictureFileDir.mkdirs()) {
@@ -58,6 +73,13 @@ public class PhotoHandler implements PictureCallback {
                     Toast.LENGTH_LONG).show();
         }
     }
+
+    /* Called when the second activity's finished */
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        savePicture();
+
+    }
+
 
     private File getDir() {
         File sdDir = Environment

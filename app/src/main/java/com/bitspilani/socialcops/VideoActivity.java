@@ -29,6 +29,8 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback, V
     public MediaRecorder mrec = new MediaRecorder();
     private Button startRecording = null;
 
+
+
     File video;
     private Camera mCamera;
 

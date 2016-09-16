@@ -17,7 +17,7 @@ public class CameraActivity extends Activity {
 
     private static final String DEBUG_TAG="CameraActivity";
     private Camera mCamera = null;
-    private CameraPreview mCameraView = null;
+    private CameraView mCameraView = null;
 
     private Camera.PictureCallback mPicture  = new PhotoHandler(this);
 
@@ -34,7 +34,7 @@ public class CameraActivity extends Activity {
 
         if(mCamera != null) {
             //Toast.makeText(CameraActivity.this, "camera is null", Toast.LENGTH_SHORT).show();
-            mCameraView = new CameraPreview(this, mCamera);//create a SurfaceView to show camera data
+            mCameraView = new CameraView(this, mCamera);//create a SurfaceView to show camera data
             FrameLayout camera_view = (FrameLayout)findViewById(R.id.camera_preview);
             camera_view.addView(mCameraView);//add the SurfaceView to the layout
         }
