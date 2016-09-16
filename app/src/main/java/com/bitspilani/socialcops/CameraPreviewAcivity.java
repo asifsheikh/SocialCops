@@ -14,11 +14,15 @@ public class CameraPreviewAcivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_imageview);
-        Bundle bundle = getIntent().getExtras();
-        byte[] data = bundle.getByteArray("ImageData");
+        byte[] data = getIntent().getExtras().getByteArray("Imagedata");
         Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
         ImageView imageView = (ImageView) findViewById(R.id.image_preview);
         imageView.setImageBitmap(bmp);
     }
 
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
 }

@@ -35,8 +35,8 @@ public class PhotoHandler implements PictureCallback {
         this.data = data;
         this.camera = camera;
         Intent intent = new Intent(context,CameraPreviewAcivity.class);
-        intent.putExtra("ImageData", data);
-        ((CameraActivity) context).startActivityForResult(new Intent(context,CameraPreviewAcivity.class),90);
+        intent.putExtra("Imagedata",data);
+        ((CameraActivity) context).startActivityForResult(intent,90);
         //context.startActivityForResult(new Intent(context,CameraPreviewAcivity.class));
     }
 
