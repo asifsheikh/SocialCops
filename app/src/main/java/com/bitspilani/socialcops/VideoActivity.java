@@ -1,22 +1,28 @@
 package com.bitspilani.socialcops;
 
 import android.app.Activity;
+import android.content.pm.ActivityInfo;
 import android.hardware.Camera;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
-import com.kinvey.java.File;
-
+import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Created by asifsheikh on 14/9/16.
@@ -24,20 +30,35 @@ import java.io.IOException;
 public class VideoActivity extends Activity implements SurfaceHolder.Callback, View.OnClickListener {
 
     private static final String DEBUG_TAG = "VideoActivity" ;
-    private SurfaceHolder surfaceHolder;
-    private SurfaceView surfaceView;
     public MediaRecorder mrec = new MediaRecorder();
-    private Button startRecording = null;
-
-
-
-    File video;
+    private SurfaceView mSurfaceView;
+    private SurfaceHolder mHolder;
     private Camera mCamera;
+    private boolean previewRunning;
+    private MediaRecorder mMediaRecorder;
+    private final int maxDurationInMs = 20000;
+    private final long maxFileSizeInBytes = 500000;
+    private final int videoFramesPerSecond = 20;
+    Button btn_record;
+    boolean mInitSuccesful = false;
+    File file;
+    ToggleButton mToggleButton;
+
+
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.video_surface);
         Log.i(null , "Video starting");
+
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+
+        mSurfaceView = (SurfaceView) findViewById(R.id.surface_camera);
+        mHolder = mSurfaceView.getHolder();
+        mHolder.addCallback(this);
+        mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+
+
         try{
             releaseCameraAndPreview();
             mCamera = getCameraInstance();//you can use open(int) to use different cameras
@@ -45,21 +66,94 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback, V
             Log.d("ERROR", "Failed to get camera: " + e.getMessage());
         }
 
+        try {
+            initRecorder(mHolder.getSurface());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
+        mToggleButton = (ToggleButton) findViewById(R.id.toggleRecordingButton);
+        //mToggleButton.setChecked(false);
+        mToggleButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            // toggle video recording
+            public void onClick(View v) {
+                if (((ToggleButton) v).isChecked())
+                    mMediaRecorder.start();
+                else {
+                    mMediaRecorder.stop();
+                    mMediaRecorder.reset();
+                }
+            }
+        });
 
-        surfaceView = (SurfaceView) findViewById(R.id.surface_camera);
-        surfaceHolder = surfaceView.getHolder();
-        surfaceHolder.addCallback(this);
-        surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
-        menu.add(0, 0, 0, "StartRecording");
-        menu.add(0, 1, 0, "StopRecording");
-        return super.onCreateOptionsMenu(menu);
+    private void initRecorder(Surface surface) throws IOException {
+        // It is very important to unlock the camera before doing setCamera
+        // or it will results in a black preview
+        if (mCamera == null)
+        {
+            mCamera = Camera.open();
+            mCamera.unlock();
+        }
+
+        if (mMediaRecorder == null)
+            mMediaRecorder = new MediaRecorder();
+
+        mMediaRecorder.setPreviewDisplay(surface);
+        mMediaRecorder.setCamera(mCamera);
+
+        mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
+
+        mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
+
+        mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.DEFAULT);
+
+        mMediaRecorder.setOutputFile(this.initFile().getAbsolutePath());
+
+        // No limit. Don't forget to check the space on disk.
+        mMediaRecorder.setMaxDuration(50000);
+        mMediaRecorder.setVideoFrameRate(24);
+        mMediaRecorder.setVideoSize(1280, 720);
+        mMediaRecorder.setVideoEncodingBitRate(3000000);
+        mMediaRecorder.setAudioEncodingBitRate(8000);
+
+        mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.DEFAULT);
+        mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+
+        try {
+            mMediaRecorder.prepare();
+        } catch (IllegalStateException e) {
+            // This is thrown if the previous calls are not called with the
+            // proper order
+            e.printStackTrace();
+        }
+
+        mInitSuccesful = true;
     }
+
+    private File initFile() {
+        // File dir = new
+        // File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES),
+        // this
+        File dir = new File(Environment.getExternalStorageDirectory(), this
+                .getClass().getPackage().getName());
+
+
+        if (!dir.exists() && !dir.mkdirs()) {
+            Log.wtf(DEBUG_TAG,"Failed to create storage directory: "
+                            + dir.getAbsolutePath());
+            Toast.makeText(VideoActivity.this, "not record", Toast.LENGTH_SHORT);
+            file = null;
+        } else {
+            file = new File(dir.getAbsolutePath(), new SimpleDateFormat(
+                    "'IMG_'yyyyMMddHHmmss'.mp4'").format(new Date()));
+        }
+        return file;
+    }
+
+
 
     private void releaseCameraAndPreview() {
         //if(mCameraView != null) mCameraView.setmCamera(null);
@@ -69,7 +163,7 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback, V
         }
     }
 
-    @Override
+   /* @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
         switch (item.getItemId())
@@ -94,7 +188,7 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback, V
                 break;
         }
         return super.onOptionsItemSelected(item);
-    }
+    }*/
 
     protected void startRecording() throws IOException
     {
@@ -103,12 +197,12 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback, V
 
         mrec.setCamera(mCamera);
 
-        mrec.setPreviewDisplay(surfaceHolder.getSurface());
+        mrec.setPreviewDisplay(mHolder.getSurface());
         mrec.setVideoSource(MediaRecorder.VideoSource.CAMERA);
         mrec.setAudioSource(MediaRecorder.AudioSource.MIC);
 
         mrec.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH));
-        mrec.setPreviewDisplay(surfaceHolder.getSurface());
+        mrec.setPreviewDisplay(mHolder.getSurface());
         mrec.setOutputFile("/sdcard/zzzz.mp4");
 
         mrec.prepare();
@@ -153,9 +247,7 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback, V
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        stopRecording();
-        releaseMediaRecorder();
-        releaseCamera();
+        finish();
     }
 
     @Override
@@ -183,12 +275,6 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback, V
 
     @Override
     public void onClick(View v) {
-        try {
-            startRecording();
-        } catch (Exception e) {
-            String message = e.getMessage();
-            Log.i(null, "Problem Start"+message);
-            mrec.release();
-        }
+
     }
 }

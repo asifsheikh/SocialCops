@@ -12,8 +12,16 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.kinvey.android.callback.KinveyUserCallback;
+import com.kinvey.java.User;
+import com.kinvey.java.core.MediaHttpUploader;
+import com.kinvey.java.core.UploaderProgressListener;
+import com.kinvey.java.model.FileMetaData;
+
+
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -142,6 +150,36 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
 
         File pictureFile = new File(filename);
 
+        ((SocialCopsApplication)getApplication()).getmKinveyClient().user().login("kid_SypuXaFc", "5c1983e775d343c3862d4f460c1ad7a3",new KinveyUserCallback() {
+            @Override
+            public void onFailure(Throwable error) {
+                Log.e(DEBUG_TAG, "Login Failure", error);
+            }
+            @Override
+            public void onSuccess(User result) {
+                Log.i(DEBUG_TAG,"Logged in a new implicit user with id: " + result.getId());
+            }
+        });
+
+        //((SocialCopsApplication)getApplication()).getmKinveyClient().file().upload();
+
+        ((SocialCopsApplication)getApplication()).getmKinveyClient().file().upload(pictureFile, new UploaderProgressListener() {
+            @Override
+            public void onSuccess(FileMetaData fileMetaData) {
+                Log.i(DEBUG_TAG, "successfully upload file");
+            }
+
+            @Override
+            public void onFailure(Throwable error) {
+                Log.e(DEBUG_TAG, "failed to upload file.", error);
+            }
+            @Override
+            public void progressChanged(MediaHttpUploader uploader) throws IOException {
+                Log.i(DEBUG_TAG, "upload progress: " + uploader.getUploadState());
+                // all updates to UI widgets need to be done on the UI thread
+            }
+        });
+
         try {
             FileOutputStream fos = new FileOutputStream(pictureFile);
             fos.write(pictureData);
@@ -167,10 +205,14 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
     public void onClick(View v) {
         if(v.getId() == R.id.button_save){
             savePicture();
-            finish();
+            ll_save_cancel.setVisibility(View.GONE);
+            imgClose.setVisibility(View.VISIBLE);
+            mCamera.startPreview();
         }
         else{
-            finish();
+            ll_save_cancel.setVisibility(View.GONE);
+            imgClose.setVisibility(View.VISIBLE);
+            mCamera.startPreview();
         }
     }
 }

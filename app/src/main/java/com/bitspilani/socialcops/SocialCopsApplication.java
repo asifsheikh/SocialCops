@@ -3,6 +3,7 @@ package com.bitspilani.socialcops;
 import android.app.Application;
 import com.kinvey.android.Client;
 
+
 /**
  * Created by asifsheikh on 3/9/16.
  */
