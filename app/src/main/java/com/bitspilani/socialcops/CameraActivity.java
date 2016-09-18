@@ -1,29 +1,15 @@
 package com.bitspilani.socialcops;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.hardware.Camera;
+import android.media.MediaActionSound;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Toast;
-
-import com.kinvey.android.callback.KinveyUserCallback;
-import com.kinvey.java.User;
-import com.kinvey.java.core.MediaHttpUploader;
-import com.kinvey.java.core.UploaderProgressListener;
-import com.kinvey.java.model.FileMetaData;
-
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 
 /**
@@ -99,22 +85,6 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
         return c; // returns null if camera is unavailable
     }
 
-    /* Called when the second activity's finished */
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == 1) {
-            if(resultCode == RESULT_OK){
-                String result=data.getStringExtra("result");
-                if(result.equals("cancel")){
-                    Toast.makeText(CameraActivity.this, "Picture not saved", Toast.LENGTH_SHORT).show();
-                }
-                else{
-                    Toast.makeText(CameraActivity.this, "Saving Picture", Toast.LENGTH_SHORT).show();
-                    savePicture();
-                }
-            }
-        }
-    }
-
     private void releaseCameraAndPreview() {
        if(mCameraView != null) mCameraView.setmCamera(null);
         if (mCamera != null) {
@@ -130,81 +100,13 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
         ll_save_cancel.setVisibility(View.VISIBLE);
     }
 
-    private void savePicture(){
-        File pictureFileDir = getDir();
-
-        if (!pictureFileDir.exists() && !pictureFileDir.mkdirs()) {
-
-            Log.d(MainActivity.DEBUG_TAG, "Can't create directory to save image.");
-            Toast.makeText(CameraActivity.this, "Can't create directory to save image.",
-                    Toast.LENGTH_LONG).show();
-            return;
-
-        }
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyymmddhhmmss");
-        String date = dateFormat.format(new Date());
-        String photoFile = "Picture_" + date + ".jpg";
-
-        String filename = pictureFileDir.getPath() + File.separator + photoFile;
-
-        File pictureFile = new File(filename);
-
-        ((SocialCopsApplication)getApplication()).getmKinveyClient().user().login("kid_SypuXaFc", "5c1983e775d343c3862d4f460c1ad7a3",new KinveyUserCallback() {
-            @Override
-            public void onFailure(Throwable error) {
-                Log.e(DEBUG_TAG, "Login Failure", error);
-            }
-            @Override
-            public void onSuccess(User result) {
-                Log.i(DEBUG_TAG,"Logged in a new implicit user with id: " + result.getId());
-            }
-        });
-
-        //((SocialCopsApplication)getApplication()).getmKinveyClient().file().upload();
-
-        ((SocialCopsApplication)getApplication()).getmKinveyClient().file().upload(pictureFile, new UploaderProgressListener() {
-            @Override
-            public void onSuccess(FileMetaData fileMetaData) {
-                Log.i(DEBUG_TAG, "successfully upload file");
-            }
-
-            @Override
-            public void onFailure(Throwable error) {
-                Log.e(DEBUG_TAG, "failed to upload file.", error);
-            }
-            @Override
-            public void progressChanged(MediaHttpUploader uploader) throws IOException {
-                Log.i(DEBUG_TAG, "upload progress: " + uploader.getUploadState());
-                // all updates to UI widgets need to be done on the UI thread
-            }
-        });
-
-        try {
-            FileOutputStream fos = new FileOutputStream(pictureFile);
-            fos.write(pictureData);
-            fos.close();
-            Toast.makeText(CameraActivity.this, "New Image saved:" + photoFile,
-                    Toast.LENGTH_LONG).show();
-        } catch (Exception error) {
-            Log.d(MainActivity.DEBUG_TAG, "File" + filename + "not saved: "
-                    + error.getMessage());
-            Toast.makeText(CameraActivity.this, "Image could not be saved.",
-                    Toast.LENGTH_LONG).show();
-        }
-    }
-
-
-    private File getDir() {
-        File sdDir = Environment
-                .getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-        return new File(sdDir, "SocialCops");
-    }
-
     @Override
     public void onClick(View v) {
         if(v.getId() == R.id.button_save){
-            savePicture();
+            //savePicture();
+            MediaActionSound sound = new MediaActionSound();
+            sound.play(MediaActionSound.SHUTTER_CLICK);
+            new PhotoUploader(pictureData,this).execute();
             ll_save_cancel.setVisibility(View.GONE);
             imgClose.setVisibility(View.VISIBLE);
             mCamera.startPreview();
@@ -215,4 +117,6 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
             mCamera.startPreview();
         }
     }
+
 }
+
