@@ -1,4 +1,4 @@
-package com.bitspilani.socialcops;
+package com.bitspilani.socialcops.camera;
 
 import android.app.Activity;
 import android.hardware.Camera;
@@ -10,6 +10,8 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+
+import com.bitspilani.socialcops.R;
 
 
 /**

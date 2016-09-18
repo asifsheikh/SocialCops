@@ -1,4 +1,4 @@
-package com.bitspilani.socialcops;
+package com.bitspilani.socialcops.camera;
 
 /**
  * Created by asifsheikh on 14/9/16.

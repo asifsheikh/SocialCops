@@ -1,14 +1,14 @@
-package com.bitspilani.socialcops;
+package com.bitspilani.socialcops.camera;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.util.Log;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.bitspilani.socialcops.MainActivity;
+import com.bitspilani.socialcops.socialcopsapplication.SocialCopsApplication;
 import com.kinvey.java.core.MediaHttpUploader;
 import com.kinvey.java.core.UploaderProgressListener;
 import com.kinvey.java.model.FileMetaData;

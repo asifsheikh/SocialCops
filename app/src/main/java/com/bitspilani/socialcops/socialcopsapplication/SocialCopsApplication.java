@@ -1,4 +1,4 @@
-package com.bitspilani.socialcops;
+package com.bitspilani.socialcops.socialcopsapplication;
 
 import android.app.Application;
 import android.widget.Toast;
