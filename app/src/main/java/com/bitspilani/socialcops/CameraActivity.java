@@ -59,6 +59,8 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
             @Override
             public void onClick(View view) {
                 if(mCamera != null){
+                    MediaActionSound sound = new MediaActionSound();
+                    sound.play(MediaActionSound.SHUTTER_CLICK);
                     mCamera.takePicture(null, null, CameraActivity.this);
                 }
                 else{
@@ -104,8 +106,6 @@ public class CameraActivity extends Activity implements Camera.PictureCallback, 
     public void onClick(View v) {
         if(v.getId() == R.id.button_save){
             //savePicture();
-            MediaActionSound sound = new MediaActionSound();
-            sound.play(MediaActionSound.SHUTTER_CLICK);
             new PhotoUploader(pictureData,this).execute();
             ll_save_cancel.setVisibility(View.GONE);
             imgClose.setVisibility(View.VISIBLE);
