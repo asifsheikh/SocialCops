@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity{
         findViewById(R.id.action_camera).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this,CameraActivity.class));
+                startActivity(new Intent(MainActivity.this, com.bitspilani.socialcops.cameranew.CameraActivity.class));
                 menuSelfieActions.collapse();
             }
         });
